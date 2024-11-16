@@ -1,5 +1,6 @@
 import mysql.connector
-from pathlib import Path
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 def obter_conexao():
     """Estabelece e retorna a conexão com o banco de dados."""
@@ -39,25 +40,56 @@ def cadastrar_usuario(nome, email, nivel_acesso, features):
         if conexao is not None:
             conexao.close()
 
-def buscar_usuario_por_impressao_digital(caminho_imagem):
-    """Busca um usuário no banco de dados pela impressão digital."""
+def pad_arrays_to_same_length(arr1, arr2):
+    max_len = max(len(arr1), len(arr2))
+    arr1_padded = np.pad(arr1, (0, max_len - len(arr1)), 'constant')
+    arr2_padded = np.pad(arr2, (0, max_len - len(arr2)), 'constant')
+    return arr1_padded, arr2_padded
+
+def comparador(features2):
+    """Compara a impressão digital passada com as do banco de dados."""
     conexao = None
     cursor = None
-
+    
     try:
         conexao = obter_conexao()
         cursor = conexao.cursor()
         
-        cursor.execute("SELECT nome FROM usuarios WHERE impressao_digital = %s", (caminho_imagem,))
-        resultado = cursor.fetchone()
+        # Recupera todas as features do banco
+        cursor.execute("SELECT id, nome, features FROM usuarios")
+        resultados = cursor.fetchall()
+        
+        max_similarity = 0
+        usuario_correspondente = None
 
-        if resultado:
-            return resultado[0], None  # Retorna o nome do usuário e None para mensagem de erro
+        for user_id, nome, features_blob in resultados:
+            # Convertendo as features do banco de string para array
+            features1 = np.fromstring(features_blob.strip('[]'), sep=',', dtype=np.int32)
+            
+            # Padronizando tamanhos dos arrays
+            features1_padded, features2_padded = pad_arrays_to_same_length(
+                features1, np.array(features2)
+            )
+            
+            # Reshape para 2D
+            features1_padded = features1_padded.reshape(1, -1)
+            features2_padded = features2_padded.reshape(1, -1)
+            
+            # Calculando similaridade
+            similarity = cosine_similarity(features1_padded, features2_padded)[0, 0]
+            
+            # Verifica se a similaridade ultrapassa o limite
+            if similarity > max_similarity:
+                max_similarity = similarity
+                usuario_correspondente = nome
+
+        if max_similarity >= 0.999:
+            return usuario_correspondente, max_similarity
         else:
-            return None, "Nenhum usuário encontrado para essa impressão digital."
+            return None, "Nenhum usuário encontrado com similaridade suficiente."
 
-    except mysql.connector.Error as err:
-        return None, str(err)
+    except mysql.connector.Error as erro:
+        return None, str(erro)
 
     finally:
         if cursor is not None:

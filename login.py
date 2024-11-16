@@ -1,26 +1,23 @@
 import cv2
 import fingerprint_feature_extractor
-import numpy as np
 import re
-from sklearn.metrics.pairwise import cosine_similarity
 
-from pathlib import Path
 from tkinter import Tk, Canvas, Button, Label, filedialog, messagebox, PhotoImage, Frame
-from banco import buscar_usuario_por_impressao_digital  # Importa a função de busca do banco de dados
+from banco import comparador
 
-documento_selecionado = None  # Variável global para armazenar o caminho da imagem
+documento_selecionado2 = None  # Variável global para armazenar o caminho da imagem
 
 def selecionar_documento():
-    global documento_selecionado
-    documento_selecionado = filedialog.askopenfilename(
+    global documento_selecionado2
+    documento_selecionado2 = filedialog.askopenfilename(
         title="Selecione uma imagem",
         filetypes=[("Imagens", "*.png;*.jpg;*.tif;*.jpeg;*.gif")]
     )
-def preprocess_image(documento_selecionado):
+def preprocess_image(documento_selecionado2):
     global image2 
-    image2 = cv2.imread(documento_selecionado, cv2.IMREAD_GRAYSCALE)
+    image2 = cv2.imread(documento_selecionado2, cv2.IMREAD_GRAYSCALE)
     if image2 is None:
-        raise ValueError(f"Image not found at {documento_selecionado}")
+        raise ValueError(f"Image not found at {documento_selecionado2}")
     return image2
 
 def extract_features(image2):
@@ -32,23 +29,24 @@ def clean_features(features):
     # Extrai apenas o endereço hexadecimal e converte para inteiro
     return [int(re.search(r'0x[0-9A-Fa-f]+', str(item)).group(), 16) for item in features]
 
-def pad_arrays_to_same_length(arr2):
-    max_len = max(len(arr2))
-    arr2_padded = np.pad(arr2, (0, max_len - len(arr2)), 'constant')
-    return arr2_padded
-
 def login():
-    if not documento_selecionado:
+    if not documento_selecionado2:
         messagebox.showwarning("Erro", "Por favor, selecione uma imagem de impressão digital.")
         return
+   
+    #Processa segunda imagem e retorna
+    imagelog = preprocess_image(documento_selecionado2)
+    features2 = extract_features(imagelog)
+    global features2_clean
+    features2_clean = clean_features(features2)
 
     # Realiza a busca no banco de dados pelo nome da imagem
-    nome_usuario, erro = buscar_usuario_por_impressao_digital(Path(documento_selecionado).name)
+    nome_usuario, resultado = comparador(features2_clean)    
     
     if nome_usuario:
         messagebox.showinfo("Login Realizado", f"Bem-vindo, {nome_usuario}!")
     else:
-        messagebox.showerror("Erro no Login", erro or "Nenhum usuário encontrado para essa impressão digital.")
+        messagebox.showerror("Erro no Login", resultado)
 
 def abrir_tela_cadastro():
     window.destroy()  # Fecha a tela de login

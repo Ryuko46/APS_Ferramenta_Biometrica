@@ -1,8 +1,6 @@
 import cv2
 import fingerprint_feature_extractor
-import numpy as np
 import re
-from sklearn.metrics.pairwise import cosine_similarity
 
 from pathlib import Path
 from tkinter import Tk, ttk, Canvas, Text, Entry, OptionMenu, StringVar, Button, filedialog, IntVar, Radiobutton, messagebox, Label,PhotoImage
@@ -35,11 +33,6 @@ def clean_features(features):
     # Extrai apenas o endereço hexadecimal e converte para inteiro
     return [int(re.search(r'0x[0-9A-Fa-f]+', str(item)).group(), 16) for item in features]
 
-def pad_arrays_to_same_length(arr1):
-    max_len = max(len(arr1))
-    arr1_padded = np.pad(arr1, (0, max_len - len(arr1)), 'constant')
-    return arr1_padded
-
 def cadastrar():
     nome = entry_1.get().strip()
     email = entry_2.get().strip()
@@ -56,6 +49,7 @@ def cadastrar():
     # Processa a primeira imagem
     imagecad = preprocess_image(documento_selecionado)
     features1 = extract_features(imagecad)
+    global features1_clean
     features1_clean = clean_features(features1)
     sucesso, mensagem = cadastrar_usuario(nome, email, int(nivel_acesso), features1_clean)
     
