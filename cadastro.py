@@ -74,7 +74,7 @@ y = (screen_height // 2) - (window_height // 2)
 
 window.geometry(f"{window_width}x{window_height}+{x}+{y}")
 window.configure(bg="#FFFFFF")
-window.iconbitmap('fingerprint.ico')
+window.iconbitmap('images/fingerprint.ico')
 window.title('Cadastro - Ministério do Meio Ambiente')
 
 canvas = Canvas(
@@ -88,7 +88,7 @@ canvas = Canvas(
 )
 
 # Carregar a imagem da seta
-seta_imagem = PhotoImage(file="goback.png")
+seta_imagem = PhotoImage(file="images/goback.png")
 
 # Redimensionar a imagem (ajustar o fator conforme necessário)
 seta_imagem = seta_imagem.subsample(9, 9)  # Reduz 5 vezes em largura e altura

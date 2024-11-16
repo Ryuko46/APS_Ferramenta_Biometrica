@@ -4,7 +4,7 @@ def carregar_dados_usuario(nome, email, nivel_acesso):
     window = Tk()
     window.geometry("1000x700")
     window.configure(bg="#E6F4EA")
-    window.iconbitmap('fingerprint.ico')
+    window.iconbitmap('images/fingerprint.ico')
     window.title(f"Perfil de {nome}")
     window.resizable(False, False)
 
@@ -39,7 +39,7 @@ def carregar_dados_usuario(nome, email, nivel_acesso):
         window.destroy()
         import login 
 
-    seta_imagem = PhotoImage(file="goback.png").subsample(9, 9)
+    seta_imagem = PhotoImage(file="images/goback.png").subsample(9, 9)
     button_voltar = Button(
         window,
         image=seta_imagem,

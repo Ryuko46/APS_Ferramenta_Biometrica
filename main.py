@@ -20,7 +20,7 @@ def on_leave(event):
 window = Tk()
 window.geometry("1000x700")
 window.configure(bg="#E6F4EA")  # Fundo verde claro
-window.iconbitmap('fingerprint.ico')
+window.iconbitmap('images/fingerprint.ico')
 window.title('Bem-vindo')
 window.resizable(False, False)
 
@@ -37,7 +37,7 @@ canvas.place(x=0, y=0)
 
 # Cabeçalho com Título e Ícone
 canvas.create_rectangle(0, 0, 1000, 80, fill="#32a852", outline="")
-brasil_image = PhotoImage(file="brasil.png").subsample(20, 20)
+brasil_image = PhotoImage(file="images/brasil.png").subsample(20, 20)
 canvas.create_image(50, 40, image=brasil_image, anchor="center")
 canvas.create_text(500, 40, text="Ministério do Meio Ambiente", fill="#FFFFFF", font=("Roboto Bold", 24))
 
