@@ -1,35 +1,34 @@
 import cv2
 import fingerprint_feature_extractor
 import re
-
 from pathlib import Path
 from tkinter import Tk, ttk, Canvas, Text, Entry, OptionMenu, StringVar, Button, filedialog, IntVar, Radiobutton, messagebox, Label,PhotoImage
-from banco import cadastrar_usuario  # Importando a função de cadastro do banco de dados
+from banco import cadastrar_usuario  
 
+documento_selecionado = None  
 
-documento_selecionado = None  # Variável global para armazenar o caminho da imagem
-
-def selecionar_documento():
+def selecionar_documento(): 
     global documento_selecionado
     documento_selecionado = filedialog.askopenfilename(
         title="Selecione uma imagem",
         filetypes=[("Imagens", "*.png;*.jpg;*.tif;*.jpeg;*.gif")]
     )
-    # Atualiza o label com o nome da imagem selecionada
+    if documento_selecionado:
+        nome_imagem = Path(documento_selecionado).name
+        label_nome_imagem.config(text=nome_imagem)
 
-def preprocess_image(documento_selecionado):
+def preprocessa_imagem(documento_selecionado):
     global image1 
     image1 = cv2.imread(documento_selecionado, cv2.IMREAD_GRAYSCALE)
     if image1 is None:
-        raise ValueError(f"Image not found at {documento_selecionado}")
+        raise ValueError(f"Imagem não encontrada em {documento_selecionado}")
     return image1
 
-def extract_features(image1):
-    # Extrai as características de minutiae
+def extracao_features(image1):
     FeaturesTerminations, FeaturesBifurcations = fingerprint_feature_extractor.extract_minutiae_features(image1)
     return FeaturesTerminations + FeaturesBifurcations
 
-def clean_features(features):
+def limpar_features(features):
     # Extrai apenas o endereço hexadecimal e converte para inteiro
     return [int(re.search(r'0x[0-9A-Fa-f]+', str(item)).group(), 16) for item in features]
 
@@ -42,15 +41,15 @@ def cadastrar():
     nivel_acesso = nivel_acesso_str.split()[-1]  # Pega o último elemento da string ("1", "2" ou "3")
     
     # Verifica se todos os campos foram preenchidos
-    if not nome or not email or not documento_selecionado:
+    if not nome or not email or not nivel_acesso or not documento_selecionado:
         messagebox.showwarning("Campos Incompletos", "Por favor, preencha todos os campos antes de cadastrar.")
         return
 
     # Processa a primeira imagem
-    imagecad = preprocess_image(documento_selecionado)
-    features1 = extract_features(imagecad)
+    imagecad = preprocessa_imagem(documento_selecionado)
+    features1 = extracao_features(imagecad)
     global features1_clean
-    features1_clean = clean_features(features1)
+    features1_clean = limpar_features(features1)
     sucesso, mensagem = cadastrar_usuario(nome, email, int(nivel_acesso), features1_clean)
     
     if sucesso:
@@ -60,8 +59,8 @@ def cadastrar():
 
 
 def abrir_tela_login():
-    window.destroy()  # Fecha a tela de cadastro
-    import login  # Importa e abre a tela de login
+    window.destroy() 
+    import login
 
 window = Tk()
 
@@ -117,7 +116,7 @@ button_voltar.image = seta_imagem
 
 canvas.place(x=0, y=0)
 
-# Fundo roxo do lado esquerdo
+# Fundo verde do lado esquerdo
 canvas.create_rectangle(0.0, 0.0, 500.0, 700.0, fill="#32a852", outline="")
 
 # Títulos e textos informativos

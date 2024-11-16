@@ -2,8 +2,10 @@ import cv2
 import fingerprint_feature_extractor
 import re
 
+from pathlib import Path
 from tkinter import Tk, Canvas, Button, Label, filedialog, messagebox, PhotoImage, Frame
 from banco import comparador
+from telasucesso import carregar_dados_usuario
 
 documento_selecionado2 = None  # Variável global para armazenar o caminho da imagem
 
@@ -13,19 +15,23 @@ def selecionar_documento():
         title="Selecione uma imagem",
         filetypes=[("Imagens", "*.png;*.jpg;*.tif;*.jpeg;*.gif")]
     )
-def preprocess_image(documento_selecionado2):
+    if documento_selecionado2:
+        nome_imagem = Path(documento_selecionado2).name
+        label_nome_imagem.config(text=nome_imagem)
+
+def preprocessa_imagem(documento_selecionado2):
     global image2 
     image2 = cv2.imread(documento_selecionado2, cv2.IMREAD_GRAYSCALE)
     if image2 is None:
         raise ValueError(f"Image not found at {documento_selecionado2}")
     return image2
 
-def extract_features(image2):
+def extracao_features(image2):
     # Extrai as características de minutiae
     FeaturesTerminations, FeaturesBifurcations = fingerprint_feature_extractor.extract_minutiae_features(image2)
     return FeaturesTerminations + FeaturesBifurcations
 
-def clean_features(features):
+def limpar_features(features):
     # Extrai apenas o endereço hexadecimal e converte para inteiro
     return [int(re.search(r'0x[0-9A-Fa-f]+', str(item)).group(), 16) for item in features]
 
@@ -35,16 +41,18 @@ def login():
         return
    
     #Processa segunda imagem e retorna
-    imagelog = preprocess_image(documento_selecionado2)
-    features2 = extract_features(imagelog)
+    imagelog = preprocessa_imagem(documento_selecionado2)
+    features2 = extracao_features(imagelog)
     global features2_clean
-    features2_clean = clean_features(features2)
+    features2_clean = limpar_features(features2)
 
     # Realiza a busca no banco de dados pelo nome da imagem
-    nome_usuario, resultado = comparador(features2_clean)    
+    dados_usuario, resultado = comparador(features2_clean)    
     
-    if nome_usuario:
-        messagebox.showinfo("Login Realizado", f"Bem-vindo, {nome_usuario}!")
+    if dados_usuario:
+        nome_usuario, email, nivel_acesso = dados_usuario
+        window.destroy()  # Fecha a tela de login
+        carregar_dados_usuario(nome_usuario, email, nivel_acesso)
     else:
         messagebox.showerror("Erro no Login", resultado)
 

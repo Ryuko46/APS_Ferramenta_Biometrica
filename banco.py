@@ -56,13 +56,13 @@ def comparador(features2):
         cursor = conexao.cursor()
         
         # Recupera todas as features do banco
-        cursor.execute("SELECT id, nome, features FROM usuarios")
+        cursor.execute("SELECT id, nome, email, nivel_acesso, features FROM usuarios")
         resultados = cursor.fetchall()
         
         max_similarity = 0
         usuario_correspondente = None
 
-        for user_id, nome, features_blob in resultados:
+        for user_id, nome, email, nivel_acesso, features_blob in resultados:
             # Convertendo as features do banco de string para array
             features1 = np.fromstring(features_blob.strip('[]'), sep=',', dtype=np.int32)
             
@@ -81,7 +81,7 @@ def comparador(features2):
             # Verifica se a similaridade ultrapassa o limite
             if similarity > max_similarity:
                 max_similarity = similarity
-                usuario_correspondente = nome
+                usuario_correspondente = nome, email, nivel_acesso
 
         if max_similarity >= 0.999:
             return usuario_correspondente, max_similarity
