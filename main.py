@@ -7,7 +7,7 @@ def abrir_tela_login():
 
 def abrir_tela_cadastro():
     window.destroy()
-    import gui  # Abre a tela de cadastro
+    import cadastro  # Abre a tela de cadastro
 
 # Funções de Animação de Botões
 def on_enter(event):
