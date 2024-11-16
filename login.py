@@ -58,7 +58,7 @@ def login():
 
 def abrir_tela_cadastro():
     window.destroy()  # Fecha a tela de login
-    import gui  # Importa e abre a tela de cadastro
+    import cadastro  # Importa e abre a tela de cadastro
 
 # Configuração da janela principal
 window = Tk()

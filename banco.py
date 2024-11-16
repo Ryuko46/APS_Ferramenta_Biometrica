@@ -40,7 +40,7 @@ def cadastrar_usuario(nome, email, nivel_acesso, features):
         if conexao is not None:
             conexao.close()
 
-def pad_arrays_to_same_length(arr1, arr2):
+def pad_arrays_para_mesmo_tamanho(arr1, arr2):
     max_len = max(len(arr1), len(arr2))
     arr1_padded = np.pad(arr1, (0, max_len - len(arr1)), 'constant')
     arr2_padded = np.pad(arr2, (0, max_len - len(arr2)), 'constant')
@@ -67,7 +67,7 @@ def comparador(features2):
             features1 = np.fromstring(features_blob.strip('[]'), sep=',', dtype=np.int32)
             
             # Padronizando tamanhos dos arrays
-            features1_padded, features2_padded = pad_arrays_to_same_length(
+            features1_padded, features2_padded = pad_arrays_para_mesmo_tamanho(
                 features1, np.array(features2)
             )
             
