@@ -25,7 +25,7 @@ def preprocessa_imagem(documento_selecionado):
     return image1
 
 def extracao_features(image1):
-    FeaturesTerminations, FeaturesBifurcations = fingerprint_feature_extractor.extract_minutiae_features(image1)
+    FeaturesTerminations, FeaturesBifurcations = fingerprint_feature_extractor.extract_minutiae_features(image1, invertImage=True)
     return FeaturesTerminations + FeaturesBifurcations
 
 def limpar_features(features):
